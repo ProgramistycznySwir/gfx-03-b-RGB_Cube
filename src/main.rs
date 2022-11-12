@@ -9,6 +9,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(MaterialPlugin::<RgbCubeMaterial>::default())
         .add_startup_system(setup)
+        .add_system(camera_controls)
         .run();
 }
 
@@ -22,7 +23,7 @@ fn setup(
     // cube
     commands.spawn().insert_bundle(MaterialMeshBundle {
         mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-        transform: Transform::from_xyz(0.0, 0.5, 0.5),
+        transform: Transform::from_xyz(0.5, 0.5, 0.5),
         // transform: Transform::from_xyz(1., 1., 1.),
         material: materials.add(RgbCubeMaterial {}),
         ..default()
@@ -34,6 +35,29 @@ fn setup(
         ..default()
     });
 }
+
+fn camera_controls(
+    keyboard: Res<Input<KeyCode>>,
+    mut camera_query: Query<&mut Transform, With<Camera3d>>,
+    time: Res<Time>
+) {
+    let mut camera = camera_query.single_mut();
+    let rotateAngle = 5.0 * time.delta_seconds();
+
+    if keyboard.pressed(KeyCode::W) {
+        camera.rotate_around(Vec3::ZERO, Quat::from_rotation_x(-rotateAngle))
+    }
+    if keyboard.pressed(KeyCode::S) {
+        camera.rotate_around(Vec3::ZERO, Quat::from_rotation_x(rotateAngle))
+    }
+    if keyboard.pressed(KeyCode::A) {
+        camera.rotate_around(Vec3::ZERO, Quat::from_rotation_y(rotateAngle))
+    }
+    if keyboard.pressed(KeyCode::D) {
+        camera.rotate_around(Vec3::ZERO, Quat::from_rotation_y(-rotateAngle))
+    }
+}
+
 
 // This is the struct that will be passed to your shader
 #[derive(AsBindGroup, TypeUuid, Debug, Clone)]
